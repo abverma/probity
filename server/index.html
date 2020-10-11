@@ -76,7 +76,7 @@
     <div class="header">
         <h1>Balance</h1>
     </div>
-    <input type="date" class="curdate">
+    <input type="date" class="curdate" placeholder="Select Date" onchange="changeDate(this)">
     <div class="main">
         <div class="box">
             <h2>Probity</h1>
@@ -110,15 +110,22 @@
 
         document.onload = start()
 
-        function start() {
+        function start(selectedDate) {
             console.log('Loaded')
             var date = new Date();
 
             // Set the date
-            curdate.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, 0) + 
+            if (selectedDate) {
+                curdate.value = selectedDate
+            } else {
+                curdate.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, 0) + 
                 '-' + date.getDate().toString().padStart(2, 0);
+            }
 
             console.log(curdate.value)
+
+            sinList.innerHTML = ''
+            probityList.innerHTML = ''
 
             getDeeds()
             .then(res => {
@@ -135,12 +142,17 @@
             })
         }
         
+        function changeDate(el) {
+            console.log(el.value)
+            start(el.value)
+        }
 
         probityText.addEventListener('keydown', (e) => {
             if (e.keyCode == 13) {
                 const li = document.createElement('li')
-                let text = e.target.value
-                li.innerHTML = e.target.value
+                const text = e.target.value
+
+                li.innerHTML = text
                 probityList.appendChild(li)
                 addDeed({
                     date: curdate.value,
@@ -152,16 +164,19 @@
         })
 
         sinText.addEventListener('keydown', (e) => {
-            console.log(e.target.value)
             if (e.keyCode == 13) {
                 const li = document.createElement('li')
-                li.innerHTML = e.target.value
+                const text = e.target.value
+
+                li.innerHTML = text
                 sinList.appendChild(li)
                 addDeed({
                     date: curdate.value,
                     text: e.target.value,
                     type: 'sin'
                 })
+
+                e.target.value = null
             }
         })
 

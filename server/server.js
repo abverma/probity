@@ -2,7 +2,6 @@ const express = require('express')
 const path = require('path')
 
 const dbManager = require('./db')
-
 const app = express()
 
 const PORT = process.env.PORT || 3000
@@ -11,6 +10,7 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`)
     next()
 })
+
 app.use((req, res, next) => {
     if (dbManager.getDb()) {
         next()
@@ -61,8 +61,7 @@ app.get('/getDeeds', (req, res) => {
 })
 
 app.post('/addDeed', (req, res) => {
-    console.log(req.body)
-    console.log(req.params)
+    
     const deed = req.body
     const db = dbManager.getDb()
     const collection = dbManager.getDb().collection('deeds')
