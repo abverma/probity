@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet"> 
+    <title>Probity</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            color: #fff;
+            background: #222;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid purple;
+        }
+
+        .main {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .box {
+            padding: 20px;
+            text-align: center;
+            min-width: 30%;
+        }
+
+        .list {
+            /* font-size: 18px;
+            padding: 30px; */
+            width: 75%;
+            margin: 20px auto 0 auto;
+            font-size: 20px;
+        }
+
+        ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 18px;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            margin-top: 20px;
+        }
+
+        li {
+            padding: 10px;
+            margin: 15px 5px;
+            border-bottom: 1px solid purple;
+        }
+
+        input[type="date"] {
+            width: 10%;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Balance</h1>
+    </div>
+    <input type="date" class="curdate">
+    <div class="main">
+        <div class="box">
+            <h2>Probity</h1>
+            <input id="probity" type="text" placeholder="Preach thy probity!">
+            <div class="list">
+                <ul class="probityList">
+                    <!-- <li>Brushed teeth</li> -->
+                </ul>
+            </div>
+            
+        </div>
+        <div class="box">
+            <h2>Sin</h2>
+            <input id="sin" type="text" placeholder="Confess thy sin!">
+            <div class="list">
+                <ul class="sinList">
+                    <!-- <li>Didn't sleep enough</li> -->
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        const probityText = document.querySelector('#probity')
+        const sinText = document.querySelector('#sin')
+        const probityList = document.querySelector('.probityList')
+        const sinList = document.querySelector('.sinList')
+
+        const curdate = document.querySelector('.curdate')
+
+        document.onload = start()
+
+        function start() {
+            console.log('Loaded')
+            var date = new Date();
+
+            // Set the date
+            curdate.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, 0) + 
+                '-' + date.getDate().toString().padStart(2, 0);
+
+            console.log(curdate.value)
+
+            getDeeds()
+            .then(res => {
+                console.log(res)
+                res.forEach(deed => {
+                    const li = document.createElement('li')
+                    li.innerHTML = deed.text
+                    if (deed.type && deed.type.toLowerCase() == 'probity') {
+                        probityList.appendChild(li)
+                    } else if (deed.type && deed.type.toLowerCase() == 'sin') {
+                        sinList.appendChild(li)
+                    }
+                })
+            })
+        }
+        
+
+        probityText.addEventListener('keydown', (e) => {
+            if (e.keyCode == 13) {
+                const li = document.createElement('li')
+                let text = e.target.value
+                li.innerHTML = e.target.value
+                probityList.appendChild(li)
+                addDeed({
+                    date: curdate.value,
+                    text: text,
+                    type: 'probity'
+                })
+                e.target.value = null
+            }
+        })
+
+        sinText.addEventListener('keydown', (e) => {
+            console.log(e.target.value)
+            if (e.keyCode == 13) {
+                const li = document.createElement('li')
+                li.innerHTML = e.target.value
+                sinList.appendChild(li)
+                addDeed({
+                    date: curdate.value,
+                    text: e.target.value,
+                    type: 'sin'
+                })
+            }
+        })
+
+        function getDeeds() {
+            return new Promise((resolve, reject) => {
+                fetch('/getDeeds?date=' + curdate.value) 
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    resolve(res.data)
+                })
+                .catch(err => {
+                    console.log(err)
+                    resolve([])
+                })
+            })
+        }
+
+        function addDeed(deed) {
+            fetch('/addDeed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body:JSON.stringify(deed)
+            })
+            .then((res) => {
+                return res.json()
+            })
+            .then((res) => {
+                console.log(res)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        }
+
+    </script>
+</body>
+</html>
